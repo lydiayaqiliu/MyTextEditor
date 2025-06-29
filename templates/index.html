@@ -5,27 +5,45 @@
 </head>
 <body>
   <h2>Synced Text Editor</h2>
-  <textarea id="editor" rows="20" cols="80"></textarea><br>
-  <button onclick="saveFile()">Save</button>
+  <textarea id="editor" rows="20" cols="80" placeholder="Loading..."></textarea><br>
+  <button onclick="manualSave()">Save Now</button>
+  <p id="status"></p>
 
   <script>
-    // Load current text when page opens
+    const textarea = document.getElementById('editor');
+    const status = document.getElementById('status');
+    let saveTimeout;
+
+    // Load text from the server on page load
     fetch('/load')
       .then(res => res.json())
       .then(data => {
-        document.getElementById('editor').value = data.content;
+        textarea.value = data.content;
+        status.textContent = "Loaded.";
       });
 
-    // Save updated text to the server
-    function saveFile() {
-      const content = document.getElementById('editor').value;
+    // Auto-save logic (called after 2s of no typing)
+    textarea.addEventListener('input', () => {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(autoSave, 2000);  // 2 seconds idle
+    });
+
+    function autoSave() {
+      const content = textarea.value;
       fetch('/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content })
       })
       .then(res => res.json())
-      .then(data => alert("Saved!"));
+      .then(data => {
+        status.textContent = `Auto-saved at ${new Date().toLocaleTimeString()}`;
+      });
+    }
+
+    // Manual save button
+    function manualSave() {
+      autoSave();
     }
   </script>
 </body>
