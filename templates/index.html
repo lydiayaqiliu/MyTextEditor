@@ -1,23 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Online Text Editor</title>
+  <title>Synced Text Editor</title>
 </head>
 <body>
-  <h1>Online Text Editor</h1>
+  <h2>Synced Text Editor</h2>
   <textarea id="editor" rows="20" cols="80"></textarea><br>
   <button onclick="saveFile()">Save</button>
 
   <script>
+    // Load current text when page opens
+    fetch('/load')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('editor').value = data.content;
+      });
+
+    // Save updated text to the server
     function saveFile() {
       const content = document.getElementById('editor').value;
       fetch('/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: 'my_note.txt', content: content })
+        body: JSON.stringify({ content })
       })
       .then(res => res.json())
-      .then(data => alert(data.message));
+      .then(data => alert("Saved!"));
     }
   </script>
 </body>
