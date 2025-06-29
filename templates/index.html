@@ -64,7 +64,7 @@
       fetch('/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: 'my_note.txt', content: content })
+        body: JSON.stringify({ content })
       })
       .then(res => res.json())
       .then(data => alert("Saved!"));
