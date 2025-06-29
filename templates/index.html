@@ -46,11 +46,19 @@
   </style>
 </head>
 <body>
-  <h1>Online Text Editor</h1>
-  <textarea id="editor" placeholder="Start typing here..."></textarea><br>
+  <h2>Synced Text Editor</h2>
+  <textarea id="editor" rows="20" cols="80"></textarea><br>
   <button onclick="saveFile()">Save</button>
 
   <script>
+    // Load current text when page opens
+    fetch('/load')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('editor').value = data.content;
+      });
+
+    // Save updated text to the server
     function saveFile() {
       const content = document.getElementById('editor').value;
       fetch('/save', {
@@ -59,7 +67,7 @@
         body: JSON.stringify({ filename: 'my_note.txt', content: content })
       })
       .then(res => res.json())
-      .then(data => alert(data.message));
+      .then(data => alert("Saved!"));
     }
   </script>
 </body>
