@@ -1,46 +1,24 @@
-<script>
-  const textarea = document.getElementById('editor');
-  const status = document.getElementById('status');
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Online Text Editor</title>
+</head>
+<body>
+  <h1>Online Text Editor</h1>
+  <textarea id="editor" rows="20" cols="80"></textarea><br>
+  <button onclick="saveFile()">Save</button>
 
-  let lastSavedContent = "";
-
-  // Load the initial content from the server
-  fetch('/load')
-    .then(res => res.json())
-    .then(data => {
-      textarea.value = data.content;
-      lastSavedContent = data.content;
-      status.textContent = "Loaded.";
-    });
-
-  // Real autosave: save every 2 seconds if content changed
-  setInterval(() => {
-    const currentContent = textarea.value;
-    if (currentContent !== lastSavedContent) {
+  <script>
+    function saveFile() {
+      const content = document.getElementById('editor').value;
       fetch('/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: currentContent })
+        body: JSON.stringify({ filename: 'my_note.txt', content: content })
       })
       .then(res => res.json())
-      .then(data => {
-        lastSavedContent = currentContent;
-        status.textContent = `Auto-saved at ${new Date().toLocaleTimeString()}`;
-      });
+      .then(data => alert(data.message));
     }
-  }, 2000);  // every 2 seconds
-
-  // Optional manual save button
-  function manualSave() {
-    fetch('/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: textarea.value })
-    })
-    .then(res => res.json())
-    .then(data => {
-      lastSavedContent = textarea.value;
-      status.textContent = `Manually saved at ${new Date().toLocaleTimeString()}`;
-    });
-  }
-</script>
+  </script>
+</body>
+</html>
