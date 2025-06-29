@@ -1,50 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Synced Text Editor</title>
-</head>
-<body>
-  <h2>Synced Text Editor</h2>
-  <textarea id="editor" rows="20" cols="80" placeholder="Loading..."></textarea><br>
-  <button onclick="manualSave()">Save Now</button>
-  <p id="status"></p>
+<script>
+  const textarea = document.getElementById('editor');
+  const status = document.getElementById('status');
 
-  <script>
-    const textarea = document.getElementById('editor');
-    const status = document.getElementById('status');
-    let saveTimeout;
+  let lastSavedContent = "";
 
-    // Load text from the server on page load
-    fetch('/load')
-      .then(res => res.json())
-      .then(data => {
-        textarea.value = data.content;
-        status.textContent = "Loaded.";
-      });
-
-    // Auto-save logic (called after 2s of no typing)
-    textarea.addEventListener('input', () => {
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(autoSave, 2000);  // 2 seconds idle
+  // Load the initial content from the server
+  fetch('/load')
+    .then(res => res.json())
+    .then(data => {
+      textarea.value = data.content;
+      lastSavedContent = data.content;
+      status.textContent = "Loaded.";
     });
 
-    function autoSave() {
-      const content = textarea.value;
+  // Real autosave: save every 2 seconds if content changed
+  setInterval(() => {
+    const currentContent = textarea.value;
+    if (currentContent !== lastSavedContent) {
       fetch('/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ content: currentContent })
       })
       .then(res => res.json())
       .then(data => {
+        lastSavedContent = currentContent;
         status.textContent = `Auto-saved at ${new Date().toLocaleTimeString()}`;
       });
     }
+  }, 2000);  // every 2 seconds
 
-    // Manual save button
-    function manualSave() {
-      autoSave();
-    }
-  </script>
-</body>
-</html>
+  // Optional manual save button
+  function manualSave() {
+    fetch('/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: textarea.value })
+    })
+    .then(res => res.json())
+    .then(data => {
+      lastSavedContent = textarea.value;
+      status.textContent = `Manually saved at ${new Date().toLocaleTimeString()}`;
+    });
+  }
+</script>
