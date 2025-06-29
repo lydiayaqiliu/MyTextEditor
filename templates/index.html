@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Online Text Editor</title>
+</head>
+<body>
+  <h1>Online Text Editor</h1>
+  <textarea id="editor" rows="20" cols="80"></textarea><br>
+  <button onclick="saveFile()">Save</button>
+
+  <script>
+    function saveFile() {
+      const content = document.getElementById('editor').value;
+      fetch('/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: 'my_note.txt', content: content })
+      })
+      .then(res => res.json())
+      .then(data => alert(data.message));
+    }
+  </script>
+</body>
+</html>
